@@ -9,12 +9,12 @@ EXTRA_HYSTERESIS = 0
 TBL = 1
 TOFF = 0
 SGT = 1
-SG4_THRS = 40
+SG4_THRS = 10
 VOLTAGE = 24.0
 OVERVOLTAGE_VTH = None
 
 # Generic tuning parameters
-COOLSTEP_THRS_FACTOR = 0.6
+COOLSTEP_THRS_FACTOR = 0.8
 FULLSTEP_THRS_FACTOR = 1.2
 MULTISTEP_FILT = True
 
@@ -32,11 +32,11 @@ TPFD = 0
 # CoolStep parameters
 FAST_STANDSTILL = True
 SMALL_HYSTERESIS = False
-SEMIN = 2
+SEMIN = 8
 SEMAX = 4
 SEUP = 3
-SEDN = 2
-SEIMIN = 1 # If we drop to 1/4 current, high accels don't work right
+SEDN = 0
+SEIMIN = 0 # If we drop to 1/4 current, high accels don't work right
 SFILT = 0
 IHOLDDELAY = 12
 IRUNDELAY = 0
