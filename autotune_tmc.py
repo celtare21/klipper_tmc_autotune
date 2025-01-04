@@ -14,7 +14,6 @@ VOLTAGE = 24.0
 OVERVOLTAGE_VTH = None
 
 # Generic tuning parameters
-COOLSTEP_THRS_FACTOR = 0.8
 FULLSTEP_THRS_FACTOR = 1.2
 MULTISTEP_FILT = True
 
@@ -236,10 +235,8 @@ class AutotuneTMC:
         if self.overvoltage_vth is not None:
             vth = int((self.overvoltage_vth / 0.009732))
             self._set_driver_field('overvoltage_vth', vth)
-        coolthrs = COOLSTEP_THRS_FACTOR * rdist
-        self._setup_pwm(self.tuning_goal, self._pwmthrs(vmaxpwm, coolthrs))
+        self._setup_pwm(self.tuning_goal, self._pwmthrs(vmaxpwm))
         # One revolution every two seconds is about as slow as coolstep can go
-        self._setup_coolstep(coolthrs)
         self._setup_highspeed(FULLSTEP_THRS_FACTOR * vmaxpwm)
         self._set_driver_field('multistep_filt', MULTISTEP_FILT)
 
@@ -314,14 +311,14 @@ class AutotuneTMC:
             # We do not have SG4
             pass
 
-    def _pwmthrs(self, vmaxpwm, coolthrs):
+    def _pwmthrs(self, vmaxpwm):
         if self.tmc_object.fields.lookup_register("sg4_thrs", None) is not None:
             # we have SG4
             # 2240 doesn't care about pwmthrs vs coolthrs ordering, but this is desirable
-            return max(0.2 * vmaxpwm, 1.125 * coolthrs)
+            return max(0.2 * vmaxpwm, 0)
         elif self.tmc_object.fields.lookup_register("sgthrs", None) is not None:
             # With SG4 on 2209, pwmthrs should be greater than coolthrs
-            return max(0.2 * vmaxpwm, 1.125 * coolthrs)
+            return max(0.2 * vmaxpwm, 0)
         else:
             # We do not have SG4, so this makes the world safe for
             # sensorless homing in the presence of CoolStep
@@ -374,20 +371,6 @@ class AutotuneTMC:
         self._set_driver_field('tpfd', self.tpfd)
         self._set_driver_field('tbl', self.tbl)
         self._set_driver_field('toff', self.toff)
-
-    def _setup_coolstep(self, coolthrs):
-        self._set_driver_velocity_field('tcoolthrs', coolthrs)
-        self._set_driver_field('sgt', self.sgt)
-        self._set_driver_field('fast_standstill', FAST_STANDSTILL)
-        self._set_driver_field('small_hysteresis', SMALL_HYSTERESIS)
-        self._set_driver_field('semin', SEMIN)
-        self._set_driver_field('semax', SEMAX)
-        self._set_driver_field('seup', SEUP)
-        self._set_driver_field('sedn', SEDN)
-        self._set_driver_field('seimin', SEIMIN)
-        self._set_driver_field('sfilt', SFILT)
-        self._set_driver_field('iholddelay', IHOLDDELAY)
-        self._set_driver_field('irundelay', IRUNDELAY)
 
     def _setup_highspeed(self, vhigh):
         self._set_driver_velocity_field('thigh', vhigh)
