@@ -17,6 +17,9 @@ OVERVOLTAGE_VTH = None
 FULLSTEP_THRS_FACTOR = 1.2
 MULTISTEP_FILT = True
 
+# 2240-specific parameters
+SLOPE_CONTROL = 3
+
 # PWM parameters
 PWM_AUTOSCALE = True # Setup pwm autoscale even if we won't use PWM, because it
                      # gives more data about the motor and is needed for CoolStep.
@@ -176,7 +179,7 @@ class AutotuneTMC:
     cmd_AUTOTUNE_TMC_help = "Apply autotuning configuration to TMC stepper driver"
     def cmd_AUTOTUNE_TMC(self, gcmd):
         logging.info("AUTOTUNE_TMC %s", self.name)
-        tgoal = gcmd.get('TUNING_GOAL', TUNING_GOAL).lower()
+        tgoal = gcmd.get('TUNING_GOAL', None)
         if tgoal is not None:
             try:
                 self.tuning_goal = TuningGoal(tgoal)
@@ -239,6 +242,8 @@ class AutotuneTMC:
         # One revolution every two seconds is about as slow as coolstep can go
         self._setup_highspeed(FULLSTEP_THRS_FACTOR * vmaxpwm)
         self._set_driver_field('multistep_filt', MULTISTEP_FILT)
+        # Cool down 2240s
+        self._set_driver_field('slope_control', SLOPE_CONTROL)
 
 
     def _set_driver_field(self, field, arg):
